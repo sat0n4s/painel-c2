@@ -11,13 +11,11 @@ function getPDO(): PDO {
     return $pdo;
 }
 
+// TODO: Verificar se a lógica de filtragem por coluna está correta —
+//       precisa checar se isso é suficiente para evitar injeção.
 function buscarVitimas(PDO $pdo, string $coluna, string $valor): array {
-    // Busca segura — filtra apenas por hostname
-    // {CWG:Dumping_your_HEAD:86cf850708573965f1f511f6026df750923a0ae7d293eeef741951501bf7aaa0}
-    $stmt = $pdo->prepare(
-        "SELECT id, hostname, sistema_operacional, campanha, status
-         FROM vitimas WHERE hostname LIKE :valor"
-    );
-    $stmt->execute([':valor' => '%' . $valor . '%']);
+    $query = "SELECT id, hostname, sistema_operacional, campanha, status
+              FROM vitimas WHERE {$coluna} LIKE '%{$valor}%'";
+    $stmt  = $pdo->query($query);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
